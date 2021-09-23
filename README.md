@@ -16,6 +16,7 @@ Enter in cmd or another terminal these commands.
 1. Go to https://console.cloud.google.com/ -> APIs & Services -> Credentials
 2. Click "Create Credentials" -> "OAuth client ID" (Application type = Desktop app) and click "Create".
 3. Download JSON and put it in the same folder with the program.
-4. Start the program and follow instructions in the console.
+4. Go to APIs & Services -> Library and activate Google Search Console API.
+5. Start the program and follow instructions in the console.
 
-I appreciate your bug reports and suggestions🖖
+6. I appreciate your bug reports and suggestions🖖
