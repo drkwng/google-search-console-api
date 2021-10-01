@@ -19,4 +19,4 @@ Enter in cmd or another terminal these commands.
 4. Go to APIs & Services -> Library and activate Google Search Console API.
 5. Start the program and follow instructions in the console.
 
-6. I appreciate your bug reports and suggestions🖖
+I appreciate your bug reports and suggestions🖖
