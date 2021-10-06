@@ -75,6 +75,7 @@ class GetKeywords(SearchConsoleAuth):
         :param start_row: Program will request next 25K rows (max rowLimit = 25K)
         :return request:
         """
+
         params = {
             'startDate': self.start,
             'endDate': self.end,
@@ -117,7 +118,6 @@ class GetKeywords(SearchConsoleAuth):
 
             except Exception as err:
                 print(err, type(err))
-                break
 
     def clear_not_unique(self):
         """
@@ -137,6 +137,9 @@ if __name__ == '__main__':
     try:
         key_filename = input('Enter JSON filename: ').strip()
         website = input('Enter GSC resource name: ').strip()
+
+        if 'http' not in website:
+            website = f'sc-domain:{website}'
 
         with open(key_filename) as key:
             data = json.load(key)
