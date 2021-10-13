@@ -35,7 +35,7 @@ class SearchConsoleAuth:
         credentials = flow.step2_exchange(code)
         http = httplib2.Http()
         http = credentials.authorize(http)
-        webmasters_service = build('webmasters', 'v3', http=http)
+        webmasters_service = build('searchconsole', 'v1', http=http)
         return webmasters_service
 
 
@@ -105,6 +105,7 @@ class GetKeywords(SearchConsoleAuth):
         Worker. Makes API requests and writes results to csv.
         """
         start_row = 0
+        print('Keywords parsing has started. Please wait...')
         while True:
             try:
                 result = self.execute_request(start_row)
@@ -156,13 +157,13 @@ if __name__ == '__main__':
 
         # Dialog to clear not unique values from csv
         while True:
-            choose_msg = input('Do you want to clear not unique values from your result csv (YES / NO)?\n')
+            choose_msg = input('\nDo you want to clear not unique values from your result csv (YES / NO)?\n')
             if 'yes' in choose_msg.lower():
                 api_req.clear_not_unique()
                 print("Done! Your keys here: 'gsc_keywords.csv'")
                 break
             elif 'no' in choose_msg.lower():
-                print("Done! Your keys here: 'gsc_keywords.csv'")
+                print("Done! Your keys are here: 'gsc_keywords.csv'")
                 break
             else:
                 print('Please choose the correct answer (YES/NO)')
