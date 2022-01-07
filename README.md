@@ -1,4 +1,4 @@
-# Google Search Console API (Search Analytics)
+# Google Search Console API (Search Analytics) by [DRKWNG](https://drkwng.rocks)
 
 The program makes requests to Google Search Console API and saves the result into a CSV file. 
 You can now download as many keywords as Search Console has in 16 months👯‍♂️
