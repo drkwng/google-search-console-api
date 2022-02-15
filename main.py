@@ -81,7 +81,6 @@ def check_index_to_csv(file, result):
 
         for key, value in result.items():
             if value is not None:
-
                 row = [
                     key, value['inspectionResult']['indexStatusResult']['coverageState'],
                     value['inspectionResult']['indexStatusResult']['robotsTxtState'],
@@ -105,10 +104,16 @@ def send_urls_to_csv(file, result):
         heading = ['url', 'type', 'notifyTime']
         writer.writerow(heading)
 
-        # {'urlNotificationMetadata': {'url': 'https://muj-na-chas.com.ua/remont-stiralnoj-mashiny/',
-        #                              'latestUpdate': {'url': 'https://muj-na-chas.com.ua/remont-stiralnoj-mashiny/',
-        #                                               'type': 'URL_UPDATED',
-        #                                               'notifyTime': '2022-02-14T16:07:52.119691315Z'}}}
+        for key, value in result.items():
+            if value is not None:
+                row = [
+                    key, value['urlNotificationMetadata']['latestUpdate']['type'],
+                    value['urlNotificationMetadata']['latestUpdate']['notifyTime']
+                ]
+            else:
+                row = [key, value]
+
+            writer.writerow(row)
 
 
 def init_get_keywords(key):
@@ -132,7 +137,6 @@ def init_get_keywords(key):
 
 
 def init_indexation_check(key, file):
-
     resource = normalize_resource_name()
     data = {}
 
@@ -171,9 +175,9 @@ def init_send_urls(key, file):
     print('URLs sending to Googlebot has started. \n'
           'Please wait and stay calm ^_____^')
     result = index.worker(urls, method)
-    print(result)
+
     res_file = 'send_urls.csv'
-    # send_urls_to_csv(res_file, result)
+    send_urls_to_csv(res_file, result)
     print(f'Done! Check the {res_file} file in "results/" folder')
 
 
