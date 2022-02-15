@@ -1,3 +1,8 @@
+################################################
+# Google Search Console & Indexing API Tools
+# by @drkwng (https://drkwng.rocks)
+################################################
+
 import os
 import re
 import csv
