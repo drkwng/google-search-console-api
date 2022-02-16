@@ -101,26 +101,6 @@ def check_index_to_csv(file, result):
             writer.writerow(row)
 
 
-def send_urls_to_csv(file, result):
-    res_folder = '\\results\\'
-    path = os.getcwd() + res_folder + file
-    with open(path, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.writer(f, delimiter=';')
-        heading = ['url', 'type', 'notifyTime']
-        writer.writerow(heading)
-
-        for key, value in result.items():
-            if value is not None:
-                row = [
-                    key, value['urlNotificationMetadata']['latestUpdate']['type'],
-                    value['urlNotificationMetadata']['latestUpdate']['notifyTime']
-                ]
-            else:
-                row = [key, value]
-
-            writer.writerow(row)
-
-
 def init_get_keywords(key):
     resource = normalize_resource_name()
 
@@ -179,11 +159,17 @@ def init_send_urls(key, file):
     index = indexing.Indexation(key)
     print('URLs sending to Googlebot has started. \n'
           'Please wait and stay calm ^_____^')
-    result = index.worker(urls, method)
-
-    res_file = 'send_urls.csv'
-    send_urls_to_csv(res_file, result)
-    print(f'Done! Check the {res_file} file in "results/" folder')
+    if 100 < len(urls) <= 200:
+        index.worker(urls[:99], method)
+        index.worker(urls[100:], method)
+        print(f'Done! Check the logs.log file in "logs/" folder')
+    elif len(urls) < 100:
+        index.worker(urls, method)
+        print(f'Done! Check the logs.log file in "logs/" folder')
+    else:
+        print('You are trying to send more than 200 URLs. \n'
+              'There is a 200 URLs quota =(')
+        exit()
 
 
 def main():
@@ -192,17 +178,15 @@ def main():
     print(path)
     logging.basicConfig(level=logging.INFO, filename=f'{path}/logs/logs.log')
 
+    api_key = search_api_key('client_secret')
     if int(tool) == 1:
-        api_key = search_api_key('client_secret')
         init_get_keywords(api_key)
 
     elif int(tool) == 2:
-        api_key = search_api_key('client_secret')
         file = get_file()
         init_indexation_check(api_key, file)
 
     elif int(tool) == 3:
-        api_key = search_api_key('service_account')
         file = get_file()
         init_send_urls(api_key, file)
 

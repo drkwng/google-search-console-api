@@ -2,11 +2,9 @@ import logging
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-
-import httplib2
-from oauth2client.service_account import ServiceAccountCredentials
-
 from googleapiclient.errors import HttpError
+
+from google.oauth2.service_account import Credentials
 
 
 class GoogleOAuth:
@@ -40,36 +38,31 @@ class GoogleOAuth:
 
 
 class GoogleServiceAccount:
-    def __init__(self, file_path, scopes):
+    def __init__(self, file_path, scopes, service_name, version):
         """
-        Google Service Account Auth for Google Indexing API
+        Google Service Account Auth
         :param file_path: service account json file
         :type file_path: str
         :param scopes: e.g. ["https://www.googleapis.com/auth/indexing"]
         :type scopes: list
+        :param service_name: e.g. 'indexing'
+        :type service_name: str
+        :param version: e.g. 'v3'
+        :type version: str
         """
         self.SERVICE_ACCOUNT_FILE = file_path
         self.SCOPES = scopes
+        self.SERVICE_NAME = service_name
+        self.VERSION = version
 
     def auth(self):
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        credentials = Credentials.from_service_account_file(
             self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES
         )
         try:
-            http = credentials.authorize(httplib2.Http())
-            return http
+            client = build(self.SERVICE_NAME, self.VERSION, credentials=credentials)
+            return client
 
         except HttpError as err:
             logging.error(err)
-
-
-if __name__ == "__main__":
-    SCOPES = ['https://www.googleapis.com/auth/webmasters']
-    CLIENT_SECRET = 'client_secret.json'
-    SERVICE_NAME = 'searchconsole'
-    VERSION = 'v1'
-
-    google_api = GoogleOAuth(CLIENT_SECRET, SCOPES, SERVICE_NAME, VERSION)
-    auth = google_api.auth()
-    print(dir(auth))
 

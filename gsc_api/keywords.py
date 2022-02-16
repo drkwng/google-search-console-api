@@ -1,7 +1,5 @@
 import logging
 
-from datetime import date, timedelta
-
 from .auth import GoogleOAuth
 
 
@@ -58,16 +56,3 @@ class GetKeywords(GoogleOAuth):
                 logging.error(err)
 
         return result
-
-
-if __name__ == "__main__":
-
-    client_secret = 'client_secret.json'
-    keywords = GetKeywords(client_secret, 'https://domain.com/')
-
-    today = date.today()
-    start_date = str(today - timedelta(days=486))
-    end_date = str(date.today() - timedelta(days=1))
-
-    data = keywords.worker(start_date, end_date)
-    print(f'Keywords est. got: {len(data)}')

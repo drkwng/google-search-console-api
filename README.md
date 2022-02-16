@@ -12,19 +12,13 @@
 4. Go to APIs & Services -> Library and activate Google Search Console API.
 5. Start the program and follow instructions in the console.
 
-### Service Account (Indexing API)
-1. Go to [https://console.cloud.google.com/](https://console.cloud.google.com/) -> APIs & Services -> Credentials
-2. Click "Create Credentials" -> "Service account" (Role - Owner, no domain app or other personal data needed).
-3. Upload your service account JSON key to the folder with a python program and name it "cred.json".
-4. Add Service Account email to your resource in Google Search Console with Owner permission (not Full, you need Owner permission).  
-
 ## Run Program
 1. Made on [Python 3.8.x](https://www.python.org/downloads/) (recommended) 
 Tick the "Add to PATH" option during the installation process. 
 
 2. **Install packages:**
 
-`pip install --upgrade google-api-python-client`
+`pip install --upgrade google-api-python-client, google-auth-oauthlib, google-auth`
 
 _Type in this command into your terminal._
 

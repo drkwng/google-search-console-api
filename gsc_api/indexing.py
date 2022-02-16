@@ -1,7 +1,6 @@
 import json
 import logging
-from .auth import GoogleOAuth, GoogleServiceAccount
-from googleapiclient.errors import HttpError
+from .auth import GoogleOAuth
 
 
 class CheckIndexation(GoogleOAuth):
@@ -17,7 +16,7 @@ class CheckIndexation(GoogleOAuth):
         self.VERSION = 'v1'
 
         super().__init__(self.CLIENT_SECRET, self.SCOPES, self.SERVICE_NAME, self.VERSION)
-        self.auth = self.auth()
+        self.service = self.auth()
 
     def exec_request(self, _url, _domain):
         try:
@@ -25,9 +24,9 @@ class CheckIndexation(GoogleOAuth):
                 'inspectionUrl': _url,
                 'siteUrl': _domain
             }
-            return self.auth.urlInspection().index().inspect(body=request).execute()
+            return self.service.urlInspection().index().inspect(body=request).execute()
 
-        except HttpError as err:
+        except Exception as err:
             logging.error(err)
             return None
 
@@ -40,7 +39,7 @@ class CheckIndexation(GoogleOAuth):
         return response
 
 
-class Indexation(GoogleServiceAccount):
+class Indexation(GoogleOAuth):
     def __init__(self, _service_account_file):
         """
         Send URLs to Googlebot via Indexing API
@@ -49,45 +48,30 @@ class Indexation(GoogleServiceAccount):
         """
         self.CLIENT_SECRET = _service_account_file
         self.SCOPES = ["https://www.googleapis.com/auth/indexing"]
+        self.SERVICE_NAME = 'indexing'
+        self.VERSION = 'v3'
 
-        super().__init__(self.CLIENT_SECRET, self.SCOPES)
-        self.auth = self.auth()
+        super().__init__(self.CLIENT_SECRET, self.SCOPES, self.SERVICE_NAME, self.VERSION)
+        self.service = self.auth()
 
-    def exec_request(self, _data):
-        endpoint = "https://indexing.googleapis.com/v3/urlNotifications:publish"
-
-        try:
-            response, content = self.auth.request(
-                endpoint, method="POST", body=_data
+    @staticmethod
+    def callback_callable(request_id, response, exception):
+        if exception is not None:
+            logging.info(f'{exception}')
+        else:
+            data = (
+                response['urlNotificationMetadata']['latestUpdate']['notifyTime'],
+                response['urlNotificationMetadata']['url'],
+                response['urlNotificationMetadata']['latestUpdate']['type'],
             )
-            return json.loads(content.decode())
-
-        except HttpError as err:
-            logging.error(err)
-            return None
+            logging.info(data)
 
     def worker(self, _urls, _method):
-        result = {}
-        for u in _urls:
-            data = {
-                'url': u.strip(),
-                'type': _method
-            }
-            result[u] = self.exec_request(json.dumps(data))
-            logging.info(f'Send {u} to Googlebot response: {result[u]}')
+        batch = self.service.new_batch_http_request(callback=self.callback_callable)
 
-        return result
+        for url in _urls:
+            batch.add(self.service.urlNotifications().publish(
+                body={"url": url, "type": _method}
+            ))
+        return batch.execute()
 
-
-if __name__ == "__main__":
-
-    # urls = {
-    #     'https://domain.com/': ['https://domain.com/url1/', 'https://domain.com/url2/', ]
-    # }
-    # check_index = CheckIndexation('client_secret.json')
-    # check_index.worker(urls)
-
-    urls = ['https://winner-stile.com.ua/rjukzaki', ]
-    method = "URL_UPDATED"
-    index = Indexation('service_account.json')
-    index.worker(urls, method)
