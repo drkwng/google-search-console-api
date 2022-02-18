@@ -1,4 +1,3 @@
-import json
 import logging
 from .auth import GoogleOAuth
 
@@ -35,7 +34,7 @@ class CheckIndexation(GoogleOAuth):
         for key, value in _data.items():
             for val in value:
                 response[val] = self.exec_request(val, key)
-                logging.info(f'Check URL {key} response: {response[val]}')
+                logging.info(f'Check URL {val} response: {response[val]}')
         return response
 
 
@@ -68,7 +67,6 @@ class Indexation(GoogleOAuth):
 
     def worker(self, _urls, _method):
         batch = self.service.new_batch_http_request(callback=self.callback_callable)
-
         for url in _urls:
             batch.add(self.service.urlNotifications().publish(
                 body={"url": url, "type": _method}

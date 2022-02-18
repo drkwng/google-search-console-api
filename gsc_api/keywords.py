@@ -22,7 +22,7 @@ class GetKeywords(GoogleOAuth):
         super().__init__(self.CLIENT_SECRET, self.SCOPES, self.SERVICE_NAME, self.VERSION)
         self.service = self.auth()
 
-    def execute_request(self, start_row, start, end, r_type, aggregate_by):
+    def execute_request(self, start_row, start, end, dimensions, r_type, aggregate_by):
         """
         Executes a searchAnalytics.query request.
         """
@@ -30,7 +30,7 @@ class GetKeywords(GoogleOAuth):
             'type': r_type,
             'startDate': start,
             'endDate': end,
-            'dimensions': ['query', 'page'],
+            'dimensions': dimensions,
             'aggregationType': aggregate_by,
             'dataState': 'all',
             'rowLimit': 25000,
@@ -39,12 +39,15 @@ class GetKeywords(GoogleOAuth):
         request = self.service.searchanalytics().query(siteUrl=self.domain, body=params).execute()
         return request
 
-    def worker(self, start, end, r_type='web', aggregate_by='auto'):
+    def worker(self, start, end, dimensions, r_type='web', aggregate_by='auto'):
         start_row = 0
         result = []
         while True:
             try:
-                response = self.execute_request(start_row, start, end, r_type, aggregate_by)
+                response = self.execute_request(
+                    start_row, start, end,
+                    dimensions, r_type, aggregate_by
+                )
                 result.append(response)
                 if len(response['rows']) == 25000:
                     start_row += 25000

@@ -30,7 +30,8 @@ class GoogleOAuth:
         credentials = flow.run_local_server(port=0)
 
         try:
-            service = build(self.SERVICE_NAME, self.VERSION, credentials=credentials)
+            service = build(self.SERVICE_NAME, self.VERSION,
+                            credentials=credentials, cache_discovery=False)
             return service
 
         except HttpError as err:
@@ -60,7 +61,8 @@ class GoogleServiceAccount:
             self.SERVICE_ACCOUNT_FILE, scopes=self.SCOPES
         )
         try:
-            client = build(self.SERVICE_NAME, self.VERSION, credentials=credentials)
+            client = build(self.SERVICE_NAME, self.VERSION,
+                           credentials=credentials, cache_discovery=False)
             return client
 
         except HttpError as err:

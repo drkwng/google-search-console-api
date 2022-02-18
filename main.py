@@ -60,18 +60,19 @@ def get_file():
     return file
 
 
-def keywords_to_csv(file, mode, result):
+def keywords_to_csv(file, mode, dimensions, result):
     res_folder = '\\results\\'
     path = os.getcwd() + res_folder + file
     with open(path, mode, encoding='utf-8', newline='') as f:
         writer = csv.writer(f, delimiter=';')
         if mode == 'w':
-            heading = ['keywords', 'url', 'clicks', 'ctr', 'impressions', 'position']
+            heading = dimensions
+            heading += ['clicks', 'impressions', 'ctr', 'position']
             writer.writerow(heading)
 
         for elem in result['rows']:
-            row = [elem['keys'][0], elem['keys'][1], elem['clicks'],
-                   elem['ctr'], elem['impressions'], elem['position']]
+            row = [key for key in elem['keys']]
+            row += [elem['clicks'], elem['ctr'], elem['impressions'], elem['position']]
             writer.writerow(row)
 
 
@@ -85,18 +86,28 @@ def check_index_to_csv(file, result):
         writer.writerow(heading)
 
         for key, value in result.items():
+            row = [key]
             if value is not None:
-                row = [
-                    key, value['inspectionResult']['indexStatusResult']['coverageState'],
+                row += [
+                    value['inspectionResult']['indexStatusResult']['coverageState'],
                     value['inspectionResult']['indexStatusResult']['robotsTxtState'],
                     value['inspectionResult']['indexStatusResult']['indexingState'],
                     value['inspectionResult']['indexStatusResult']['lastCrawlTime'],
-                    value['inspectionResult']['indexStatusResult']['googleCanonical'],
-                    value['inspectionResult']['indexStatusResult']['userCanonical'],
-                    value['inspectionResult']['mobileUsabilityResult']['verdict']
                 ]
+                try:
+                    row += [
+                        value['inspectionResult']['indexStatusResult']['googleCanonical'],
+                        value['inspectionResult']['indexStatusResult']['userCanonical']
+                    ]
+                except KeyError:
+                    row += [None, None]
+
+                try:
+                    row.append(value['inspectionResult']['mobileUsabilityResult']['verdict'])
+                except KeyError:
+                    row.append(None)
             else:
-                row = [key, value]
+                row.append(value)
 
             writer.writerow(row)
 
@@ -109,14 +120,30 @@ def init_get_keywords(key):
     start_date = str(today - timedelta(days=486))
     end_date = str(date.today() - timedelta(days=1))
 
+    available_dimensions = ["date", "query", "page", "country", "device", "search_appearance"]
+
+    while True:
+        dimensions = list(input(f"Please input one of the available dimensions \n"
+                                f"{available_dimensions} divided by ',' WITHOUT SPACES\n"
+                                f"or press Enter to get data with the 'query' dimension:\n").strip().split(','))
+        if set(dimensions).issubset(set(available_dimensions)):
+            break
+        elif len(dimensions) == 0:
+            dimensions = ['query', ]
+            print("You chose a 'query' dimension")
+            break
+        else:
+            print("Please enter correct dimensions or press Enter")
+
     get_keywords = keywords.GetKeywords(key, resource)
     print('Keywords parsing has started. \n'
           'Please wait and stay calm ^_____^')
-    result = get_keywords.worker(start_date, end_date)
 
-    res_file = 'keywords.csv'
+    result = get_keywords.worker(start_date, end_date, dimensions=dimensions)
+
+    res_file = 'search_analytics.csv'
     for num, elem in enumerate(result):
-        keywords_to_csv(res_file, 'w' if num == 0 else 'a', elem)
+        keywords_to_csv(res_file, 'w' if num == 0 else 'a', dimensions, elem)
 
     print(f'Done! Check the {res_file} file in "results/" folder')
 
@@ -175,7 +202,7 @@ def init_send_urls(key, file):
 def main():
     tool = choose_tool()
     path = os.getcwd()
-    print(path)
+
     logging.basicConfig(level=logging.INFO, filename=f'{path}/logs/logs.log')
 
     api_key = search_api_key('client_secret')
