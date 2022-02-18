@@ -10,7 +10,7 @@ import logging
 
 from datetime import date, timedelta
 
-from gsc_api import indexing, keywords
+from gsc_api import indexing, search_analytics
 
 
 def choose_tool():
@@ -116,12 +116,23 @@ def init_get_keywords(key):
     resource = normalize_resource_name()
 
     today = date.today()
-    # Last 16 month limit
-    start_date = str(today - timedelta(days=486))
+
+    while True:
+        num_months = input('Please enter number of months period (1-16) you want to get data '
+                           'or press Enter to get data with the default 16 months period:\n').strip()
+        if 16 > int(num_months) > 0:
+            start_date = str(today - timedelta(days=int(num_months)*30))
+            break
+        elif len(num_months) == 0:
+            start_date = str(today - timedelta(days=486))
+            print(f'Start date is: {start_date}')
+            break
+        else:
+            print("Please enter the number in 1 to 16 range or press Enter")
+
     end_date = str(date.today() - timedelta(days=1))
 
     available_dimensions = ["date", "query", "page", "country", "device", "search_appearance"]
-
     while True:
         dimensions = list(input(f"Please input one of the available dimensions \n"
                                 f"{available_dimensions} divided by ',' WITHOUT SPACES\n"
@@ -135,7 +146,7 @@ def init_get_keywords(key):
         else:
             print("Please enter correct dimensions or press Enter")
 
-    get_keywords = keywords.GetKeywords(key, resource)
+    get_keywords = search_analytics.GetData(key, resource)
     print('Keywords parsing has started. \n'
           'Please wait and stay calm ^_____^')
 

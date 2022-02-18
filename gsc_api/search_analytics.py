@@ -3,7 +3,7 @@ import logging
 from .auth import GoogleOAuth
 
 
-class GetKeywords(GoogleOAuth):
+class GetData(GoogleOAuth):
     def __init__(self, _client_secret_file, _domain):
         """
         Get all keywords from Google Search Console (last 16 months)
