@@ -15,7 +15,7 @@ from gsc_api import indexing, search_analytics
 
 def choose_tool():
     print('Choose tool (enter number) \n'
-          '1 - Keywords from Google Search Console\n'
+          '1 - Search Analytics (get Performance data from Google Search Console\n'
           '2 - Check URLs indexation and other params\n'
           '3 - Send URLs to Googlebot')
     while True:
